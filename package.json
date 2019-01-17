@@ -1,0 +1,24 @@
+{
+  "name": "table-butcher",
+  "version": "0.0.1",
+  "description": "cell lover",
+  "main": "home.js",
+  "scripts": {
+    "test": "test"
+  },
+  "keywords": [
+    "cell",
+    "table",
+    "merge",
+    "split"
+  ],
+ "repository": {
+    "type": "git",
+    "url": "https://github.com/counterm/tableButcher"
+  },
+  "author": "cm",
+  "license": "MIT",
+  "devDependencies": {
+    "rollup": "^1.1.0"
+  }
+}
