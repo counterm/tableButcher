@@ -4,7 +4,8 @@
   "description": "cell lover",
   "main": "home.js",
   "scripts": {
-    "test": "test"
+    "test": "test",
+    "dev": "parcel ./test/panel.html"
   },
   "keywords": [
     "cell",
@@ -12,13 +13,11 @@
     "merge",
     "split"
   ],
- "repository": {
+  "repository": {
     "type": "git",
     "url": "https://github.com/counterm/tableButcher"
   },
   "author": "cm",
   "license": "MIT",
-  "devDependencies": {
-    "rollup": "^1.1.0"
-  }
+  "devDependencies": {}
 }

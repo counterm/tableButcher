@@ -2,13 +2,118 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Full Control</title>
+    <title>Control Cell</title>
+    <style>
+        td.over{
+            background-color:#8fd88f;
+        }
+    </style>
 </head>
 <body>
-    <table></table>
-    <script src="../dist/cell.min.js"></script>
+    <div style="text-align: center;">
+    <input type="button" value="append column" onclick="tb.addRow()">
+    <input type="button" value="append row" onclick="tb.addCell()">
+    <input type="button" value="insert left" onclick="tb.insertRow(lastClickTd)">
+    <input type="button" value="insert top" onclick="tb.insertCell(lastClickTd)">
+    <br>
+    <input type="button" value="split" onclick="split()">
+    <input type="button" value="merge" onclick="tb.merge(...mouseMoveTd);clearStyle('over');">
+    </div>
+
+    <table border="1" width="100%" cellpadding="10"></table>
+    <script src="../src/home.js"></script>
     <script>
+        let tb = new TableBuster(document.querySelector('table'));
+        // let tds;
+
+        function split(){
+            tb.split(lastClickTd, 
+                function(td, offsetRow, offsetCell){
+                    console.log(offsetRow, offsetCell);
+                    td.innerText = `split in (${offsetRow}, ${offsetCell})`;
+                    return td;
+                }
+            );
+            clearLastChild();
+            clearStyle('over');
+        }
+
+        function fillSquare(rowCapacity){
+            Array.apply(null, {length:rowCapacity}).forEach(()=>{
+                tb.addCell().addRow();
+            });
+            let characterStart = 65;
+            document.querySelectorAll('td').forEach((td, index)=>{
+                td.innerText = String.fromCharCode(characterStart+(index / rowCapacity)) + index % rowCapacity;
+            });
+        }
+
+        function clearStyle(className){
+            document.querySelectorAll('td').forEach((td)=>{
+                td.classList.remove(className);
+            });
+        }
+
+        function clearLastChild(){
+            if (lastClickTd)
+                lastClickTd.style.backgroundColor = "";
+                lastClickTd = null;
+        }
+
+        let lastClickTd = null,
+            flagMouseDown = false,
+            mouseMoveTd = [null, null];
+        function eventForTest(){
+            tb.dom.addEventListener('click', (event)=>{
+                if (event.target.nodeName === 'TD'){
+                    mouseMoveTd = [null, null];
+                    event.target.style.backgroundColor = "yellow";
+                    // if (lastClickTd)
+                    //     lastClickTd.style.backgroundColor = "";
+                    clearLastChild();
+                    lastClickTd = event.target;
+                }
+            }, false);
+
+            tb.dom.addEventListener('mousedown', (event)=>{
+                event.preventDefault();
+                event.stopPropagation();
+                if (event.target.nodeName === 'TD'){
+                    flagMouseDown = true;
+                    clearStyle('over');
+                    mouseMoveTd[0] = event.target;
+                    event.target.classList.add('over');
+                }
+            }, false);
+            tb.dom.addEventListener('mouseover', (event)=>{
+                if (event.target.nodeName === 'TD'){
+                    if (flagMouseDown === true){
+                        mouseMoveTd[1] = event.target;
+                        let tdRange = tb.findAreaTd(...mouseMoveTd);
+                        clearStyle('over');
+                        tdRange.forEach((td)=>{
+                            td.classList.add('over');
+                        });
+                        // clear last child
+                        clearLastChild();
+                    }
+                }
+            }, false);
+            tb.dom.addEventListener('mouseup', (event)=>{
+                flagMouseDown = false;
+            }, false);
+        }
+
+        fillSquare(10);
+        tb.refresh();
+        eventForTest();
+        lastClickTd = document.querySelector('td');
+
         
+        const tds = document.querySelectorAll('td');
+
+        //
+        tb.merge(tds[12], tds[24]);
     </script>
 </body>
 </html>
