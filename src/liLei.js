@@ -65,7 +65,6 @@ export default {
         });
     },
 
-
     /**
      * 
      * @param {Function} fn (number, rowIndex, colIndex)
@@ -247,6 +246,9 @@ export default {
                 }
             }
 
+            colIndex = colIndex < 0 ? 0 : colIndex;
+            rowIndex--;
+            
             // move up in col
             while(rowIndex >= 0){
                 tmpNum = m[rowIndex][colIndex];
@@ -342,7 +344,7 @@ export default {
 
 
     /**
-     * give some matrix axis, return all matrix unit of which was by TD holding.
+     * give some matrix axis, return all matrix unit of which was by TD there.
      * @param  {...any} mats 
      */
     getMatRectangeArea(...mats){

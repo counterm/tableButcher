@@ -11,14 +11,42 @@ export default {
     },
     // can recognize each big cell, and expand them by increase their colspan.
     insertRow(beforeTd){
-        // el matrix axis
-        let [rowIndex, colIndex] = this.getTdIndex(beforeTd);
-        let [matRow, matCol] = this.matrixTd2Mat(rowIndex, colIndex);
-        let me = this
-        this.forEachRow((row, index)=>{
-            let [rowEach, colEach] = me.matrixMat2Td(matRow, matCol);
-            row.insertCell(colEach);
-        });
+        // const beforeTr = beforeTd.parentNode;
+        const [tdRowIndex, tdColIndex] = this.getTdIndex(beforeTd);
+        let [sizeRow, sizeCell] = this.getSize();
+        const fnAddTd = () => trHolder.append(document.createElement('td'));
+        // first row.
+        const trHolder = document.createElement('tr');
+        if (tdRowIndex == 0) {
+            while (sizeCell > 0) {
+                fnAddTd();
+                sizeCell--;
+            }
+        } else {
+            // const tdBase = [];          // create row upon which TD.
+            const trHolder = document.createElement('tr');
+            let sizeIndex = 0;
+
+            while (sizeIndex < sizeCell) {
+                const tdFound = this.getTdByMatrix(tdRowIndex, sizeIndex);
+                const cellType = this.cellType(tdRowIndex, sizeIndex);
+                if (cellType == this.CELL_NORMAL) {
+                    fnAddTd();
+                    sizeIndex++;
+                } else if (cellType == this.CELL_BIG_HEAD) {
+                    let size = tdFound.colSpan;
+                    while (size > 0) {
+                        fnAddTd();
+                        size--;
+                    }
+                    sizeIndex += tdFound.colSpan;
+                } else if (cellType == this.CELL_BIG_HEAD || cellType == this.CELL_BIG) {
+                    tdFound.rowSpan += 1;
+                    sizeIndex += tdFound.colSpan;
+                }
+            }
+        }
+        beforeTd.parentNode.before(trHolder);
         this.refresh();
         return this;
     },
@@ -43,23 +71,23 @@ export default {
         // }
         // if beforeTd is the first of the row.
         
-        let [rowIndex, colIndex] = this.getTdIndex(beforeThisTd);
-        if (colIndex == 0) {
+        let [tdRowIndex, tdColIndex] = this.getTdIndex(beforeThisTd);
+        if (tdColIndex == 0) {
             this.forEachRow(row => {
                 row.childNodes[0].before(document.createElement('td'));
             });
         } else {
-            const tdProcessed = [];
+            const tdDone = [];
             const matrix = this.getTdMatrix(beforeThisTd);
             this.forEachRow((row, indexRow) => {
-                const td = this.getTdByMatrix(indexRow, matrix - 1);
-                if (td in tdProcessed == false) {
+                const td = this.getTdByMatrix(indexRow, matrix[1] - 1);
+                if (tdDone.indexOf(td) == -1) {
                     if (this.cellType(td) == this.CELL_NORMAL) {
                         td.after(document.createElement('td'));
                     } else {    // big cell
                         td.colSpan += 1;
                     }
-                    tdProcessed.push(td);
+                    tdDone.push(td);
                 }
             });
         }

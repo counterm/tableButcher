@@ -5,7 +5,8 @@
   "main": "home.js",
   "scripts": {
     "test": "test",
-    "dev": "parcel ./test/panel.html"
+    "dev": "parcel ./test/panel.html",
+    "build": "node ./test/cp.js && parcel build ./src/home.js -d demo -o table_buster.min.js"
   },
   "keywords": [
     "cell",
