@@ -11,8 +11,8 @@
 </head>
 <body>
     <div style="text-align: center;">
-    <input type="button" value="append column" onclick="tb.addRow()">
-    <input type="button" value="append row" onclick="tb.addCell()">
+    <input type="button" value="append column" onclick="tb.addCellToAllRow()">
+    <input type="button" value="append row" onclick="tb.addNewRow()">
     <input type="button" value="insert left" onclick="tb.insertCell(lastClickTd)">
     <input type="button" value="insert top" onclick="tb.insertRow(lastClickTd)">
     <br>
@@ -42,7 +42,7 @@
 
         function fillSquare(rowCapacity){
             Array.apply(null, {length:rowCapacity}).forEach(()=>{
-                tb.addCell().addRow();
+                tb.addNewRow().addCellToAllRow();
             });
             let characterStart = 65;
             document.querySelectorAll('td').forEach((td, index)=>{
@@ -115,7 +115,7 @@
         const tds = document.querySelectorAll('td');
 
         //
-        tb.merge(tds[12], tds[24]);
+        // tb.merge(tds[12], tds[24]);
     </script>
 </body>
 </html>

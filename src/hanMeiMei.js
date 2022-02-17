@@ -1,10 +1,10 @@
 // tidy girl
 // append column or row
 export default {
-    addRow(){
+    addCellToAllRow(){
         this.forEachRow((row, rowIndex)=>{
-             let td = document.createElement('td');
-             row.append(td);
+            let td = this.nanny.newTd();
+            this.nanny.appendTd(row, td);
         });
         this.refresh();
         return this;
@@ -14,9 +14,9 @@ export default {
         // const beforeTr = beforeTd.parentNode;
         const [tdRowIndex, tdColIndex] = this.getTdIndex(beforeTd);
         let [sizeRow, sizeCell] = this.getSize();
-        const fnAddTd = () => trHolder.append(document.createElement('td'));
+        const trHolder = this.nanny.newTr();
+        const fnAddTd = () => this.nanny.appendTd(trHolder, this.nanny.newTd());
         // first row.
-        const trHolder = document.createElement('tr');
         if (tdRowIndex == 0) {
             while (sizeCell > 0) {
                 fnAddTd();
@@ -24,25 +24,25 @@ export default {
             }
         } else {
             // const tdBase = [];          // create row upon which TD.
-            const trHolder = document.createElement('tr');
             let sizeIndex = 0;
 
             while (sizeIndex < sizeCell) {
                 const tdFound = this.getTdByMatrix(tdRowIndex, sizeIndex);
                 const cellType = this.cellType(tdRowIndex, sizeIndex);
+                const colSpan = this.nanny.getTdColSpan(tdFound);
                 if (cellType == this.CELL_NORMAL) {
                     fnAddTd();
                     sizeIndex++;
                 } else if (cellType == this.CELL_BIG_HEAD) {
-                    let size = tdFound.colSpan;
+                    let size = colSpan;
                     while (size > 0) {
                         fnAddTd();
                         size--;
                     }
-                    sizeIndex += tdFound.colSpan;
+                    sizeIndex += colSpan;
                 } else if (cellType == this.CELL_BIG_HEAD || cellType == this.CELL_BIG) {
-                    tdFound.rowSpan += 1;
-                    sizeIndex += tdFound.colSpan;
+                    this.nanny.setTdSpan(tdFound, 1, null, true);
+                    sizeIndex += colSpan;
                 }
             }
         }
@@ -50,11 +50,11 @@ export default {
         this.refresh();
         return this;
     },
-    addCell(){
+    addNewRow(){
         let [rowCount, colCount] = this.getSize(),
-            newTr = this.dom.insertRow(rowCount);
+            newTr = this.nanny.insertRow(this.dom, rowCount);
         while(colCount>0){
-            newTr.append(document.createElement('td'));
+            this.nanny.appendTd(newTr, this.nanny.newTd());
             colCount--;
         }
         this.refresh();
@@ -66,7 +66,7 @@ export default {
         //     [rowCount, colCount] = this.getSize(),
         //     newTr = this.dom.insertRow(rowIndex);
         // while(colCount>0){
-        //     newTr.append(document.createElement('td'));
+        //     newTr.append(this.nanny.newTd());
         //     colCount--;
         // }
         // if beforeTd is the first of the row.
@@ -74,7 +74,7 @@ export default {
         let [tdRowIndex, tdColIndex] = this.getTdIndex(beforeThisTd);
         if (tdColIndex == 0) {
             this.forEachRow(row => {
-                row.childNodes[0].before(document.createElement('td'));
+                this.nanny.insertBeforeTd(row, this.nanny.getTdInRow(row, 0), this.nanny.newTd());
             });
         } else {
             const tdDone = [];
@@ -83,7 +83,7 @@ export default {
                 const td = this.getTdByMatrix(indexRow, matrix[1] - 1);
                 if (tdDone.indexOf(td) == -1) {
                     if (this.cellType(td) == this.CELL_NORMAL) {
-                        td.after(document.createElement('td'));
+                        td.after(this.nanny.newTd());
                     } else {    // big cell
                         td.colSpan += 1;
                     }

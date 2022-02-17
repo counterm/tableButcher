@@ -1,5 +1,6 @@
 // A creative boy
 // something about table matrix
+let _refreshTimeout = 0;
 export default {
     /*
 
@@ -36,6 +37,8 @@ export default {
     matrix:[[]],
     refresh(){
         // let time = +new Date();
+        // window.clearTimeout(_refreshTimeout);
+        // _refreshTimeout = window.setTimeout(() => this.buildMatrix(), 300);
         this.buildMatrix();
         // console.log(`refresh time use: ${(+new Date() - time)}ms`);
     },
@@ -181,10 +184,10 @@ export default {
         
         if (matCol == null){
             // argument was td
-            if (matRowOrTd instanceof HTMLTableCellElement){
-                [matRowOrTd, matCol] = this.matrixTd2Mat(...this.getTdIndex(matRowOrTd));
-            }else{ // argument was number
+            if (typeof matRowOrTd == 'number') {
                 number = matRowOrTd;
+            } else {
+                [matRowOrTd, matCol] = this.matrixTd2Mat(...this.getTdIndex(matRowOrTd));
             }
         }
         

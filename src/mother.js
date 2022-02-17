@@ -18,18 +18,14 @@ export default {
         
         // remove node
         arrTdInArea.forEach((td, index)=>{
-            if (td.childNodes.length > 0){
-                // swap node
-                td.childNodes.forEach((node, index)=>{
-                    firstTd.append(node);
-                })
-            }
+            this.nanny.moveTdChilds(td, firstTd)
             td.parentNode.removeChild(td);
         });
 
         // merge node
-        firstTd.rowSpan = rowSpan;
-        firstTd.colSpan = colSpan;
+        this.nanny.setTdSpan(firstTd, rowSpan, colSpan);
+        // firstTd.rowSpan = rowSpan;
+        // firstTd.colSpan = colSpan;
 
         this.refresh();
     },

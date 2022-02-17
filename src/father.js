@@ -8,12 +8,15 @@ export default {
         if (!decorater) decorater = (td) => td;
         let [spanRow, spanCol] = this.getSpan(td);
         if (spanRow > 1 || spanCol > 1) {
-            td.rowSpan = 1;
-            td.colSpan = 1;
+            this.nanny.setTdSpan(td, 1, 1);
             // row 1
             let spanIndexCol = spanCol - 1;
             while (spanIndexCol > 0) {
-                td.after(decorater(document.createElement('td'), 0,  spanIndexCol - 1));
+                this.nanny.insertAfterTd(
+                    this.nanny.getRowByTd(this.dom, td), 
+                    td,
+                    decorater(this.nanny.newTd(), 0,  spanIndexCol - 1)
+                );
                 spanIndexCol--;
             }
             // other row
@@ -22,8 +25,8 @@ export default {
             const arrTdMatrix = this.getTdMatrix(td);
             while (spanIndexRow >= 0) {
                 spanIndexCol = spanCol - 1;
-                const tr = td.parentNode.parentNode.childNodes[arrTdIndex[0] + (spanRow - 1 - spanIndexRow)];
-                const tds = tr.childNodes;
+                const tr = this.nanny.getRowByIndex(this.dom, arrTdIndex[0] + (spanRow - 1 - spanIndexRow));
+                const tds = this.nanny.getTdsInRow(tr);
                 const firstTdMatrix = tds.length > 0 ? this.getTdMatrix(tds[0]) : Number.MAX_VALUE;
                 /*
                     1. The td ready to merge was on the first cell index.
@@ -32,7 +35,10 @@ export default {
                  */
                 if (arrTdMatrix[0] == 0 && tds.length == 0 && firstTdMatrix[1] <= arrTdMatrix[1]) {
                     while (spanIndexCol >= 0) {
-                        tr.appendChild(decorater(document.createElement('td'), spanRow - 1 - spanIndexRow, spanCol - 1 - spanIndexCol));
+                        this.nanny.appendTd(
+                            tr,
+                            decorater(this.nanny.newTd(), spanRow - 1 - spanIndexRow, spanCol - 1 - spanIndexCol)
+                        );
                         spanIndexCol--;
                     }
                 } else {
@@ -41,13 +47,21 @@ export default {
                         const tdFoundMatrix = this.getTdMatrix(tdFound);
                         if (tdFoundMatrix[1] > arrTdMatrix[1]) {
                             while (spanIndexCol >= 0) {
-                                tdFound.before(decorater(document.createElement('td'), spanRow - 1 - spanIndexRow, spanCol - 1 - spanIndexCol));
+                                this.nanny.insertBeforeTd(
+                                    tr,
+                                    tdFound,
+                                    decorater(this.nanny.newTd(), spanRow - 1 - spanIndexRow, spanCol - 1 - spanIndexCol)
+                                );
                                 spanIndexCol--;
                             }
                             break;
                         } else if (index + 1 == tds.length) {   // last position
                             while (spanIndexCol >= 0) {
-                                tdFound.after(decorater(document.createElement('td'), spanRow - 1 - spanIndexRow, spanIndexCol - 1));
+                                this.nanny.insertAfterTd(
+                                    tr,
+                                    tdFound,
+                                    decorater(this.nanny.newTd(), spanRow - 1 - spanIndexRow, spanIndexCol - 1)
+                                );
                                 spanIndexCol--;
                             }
                         }
@@ -63,7 +77,7 @@ export default {
         if (!td) return;
         // const size = td.colSpan;
         const [tdRowMatrix, tdColMatrix] = this.getTdMatrix(td);
-        const tdColSpan = td.colSpan;
+        const tdColSpan = this.nanny.getTdColSpan(td);
         let tdColCount = 0;
 
         while (tdColCount < tdColSpan) {
@@ -81,15 +95,17 @@ export default {
         while (rowIndex < tbSize[0]) {
             const tdFound = this.getTdByMatrix(rowIndex, tdColMatrix);
             if (tdFound && tdDone.indexOf(tdFound) == -1) {
-                if (tdFound.colSpan > 1) {
-                    tdFound.colSpan -= 1;
+                let span = this.nanny.getTdColSpan(tdFound);
+                if (span > 1) {
+                    this.nanny.setTdSpan(tdFound, null, span - 1);
                 } else {
-                    tdFound.parentNode.removeChild(tdFound);
+                    this.nanny.delTd(this.nanny.getRowByIndex(this.dom, rowIndex), tdFound);
                 }
                 tdDone.push(tdFound);
                 // fix some td rowSpan greater than 1, and delete wrong TDs in the next row.
-                if (tdFound.rowSpan > 1) {
-                    rowIndex += tdFound.rowSpan;
+                const rowSpan = this.nanny.getTdRowSpan(tdFound);
+                if (rowSpan > 1) {
+                    rowIndex += rowSpan;
                     continue;
                 }
             }
@@ -102,7 +118,7 @@ export default {
         // const tr = td.parentNode;
         const [tdRowMatrix, tdColMatrix] = this.getTdMatrix(td);
 
-        const tdRowSpan = td.rowSpan;
+        const tdRowSpan = this.nanny.getTdRowSpan(td);
         let tdRowCount = 0;
         while (tdRowCount < tdRowSpan) {
             this.deleteRowHandler(tdRowMatrix);
@@ -112,8 +128,9 @@ export default {
     },
 
     deleteRowHandler(tdRowMatrix) {
-        const tr = this.dom.childNodes[0].childNodes[tdRowMatrix];
-        const nextTr = tr.nextElementSibling;
+        const tr = this.nanny.findRowByIndex(this.dom, tdRowMatrix);
+        // const nextTr = tr.nextElementSibling;
+        const nextTr = this.nanny.findRowByIndex(this.dom, tdRowMatrix + 1);
         const tbSize = this.getSize();
         let colIndex = 0;
         const tdMarkShort = [];
@@ -123,36 +140,45 @@ export default {
             // 
             if (cellType == this.CELL_BIG_HEAD) {
                 const tdFound = this.getTdByMatrix(tdRowMatrix, colIndex);
+                const tdRowSpan = this.nanny.getTdRowSpan(tdFound);
+                const tdColSpan = this.nanny.getTdColSpan(tdFound);
                 // move tdFound to next tr
-                if (tdFound.rowSpan > 1 && tbSize[0] != tdRowMatrix) {
-                    let nextTdColMatrix = colIndex + tdFound.colSpan;
+                if (tdRowSpan > 1 && tbSize[0] != tdRowMatrix) {
+                    let nextTdColMatrix = colIndex + tdColSpan;
                     while (nextTdColMatrix < tbSize[1]) {
                         const nextRowTd = this.getTdByMatrix(tdRowMatrix + 1, nextTdColMatrix);
-                        if (nextRowTd.parentNode == nextTr) {
-                            nextRowTd.before(tdFound);
+                        const row = this.nanny.getRowByIndex(this.dom, tdRowMatrix + 1);
+                        if (row == nextTr) {
+                            // nextRowTd.before(tdFound);
+                            this.nanny.insertBeforeTd(row, nextRowTd, tdFound);
                             break;
                         }
                         nextTdColMatrix++;
                     }
-                    if (tdFound.parentNode != nextTr) {
-                        nextTr.appendChild(tdFound);
+                    const tdFoundInRow = this.nanny.getRowByTd(tdFound);
+                    if (tdFoundInRow != nextTr && nextTr) {
+                        this.nanny.appendTd(nextTr, tdFound);
                     }
                     // make sure short it.
-                    tdFound.rowSpan--;
+                    this.nanny.setTdSpan(tdFound, -1, null, true);
+                    // tdFound.rowSpan--;
                     this.refresh();
                 }
 
-                colIndex += tdFound.colSpan;
+                // colIndex += tdFound.colSpan;
+                colIndex += tdColSpan;
             } else if(cellType == this.CELL_BIG) {
                 const tdFound = this.getTdByMatrix(tdRowMatrix, colIndex);
                 tdMarkShort.push(tdFound);
-                this.refresh()
-                colIndex += tdFound.colSpan;
+                this.refresh();
+                const tdColSpan = this.nanny.getTdColSpan(tdFound);
+                // colIndex += tdFound.colSpan;
+                colIndex += tdColSpan;
             } else {
                 colIndex++;
             }
         }
-        tdMarkShort.forEach((td) => td.rowSpan--);
-        tr.parentNode.removeChild(tr);
+        tdMarkShort.forEach((td) => this.nanny.setTdSpan(td, -1, null, true));
+        this.nanny.delTr(this.dom, tr);
     }
 };

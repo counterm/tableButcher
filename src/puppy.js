@@ -1,12 +1,13 @@
  // utils, a dog always hardworing.
-export default{
+
+export default {
     tableClassName: '_table-butcher_',
     init(table){
         this.dom = table;
     },
 
     getSpan(td){
-        return [td.rowSpan, td.colSpan];
+        return [this.nanny.getTdRowSpan(td), this.nanny.getTdColSpan(td)];
     },
 
 
@@ -22,7 +23,7 @@ export default{
             }
         });
 
-        const tds = tr.querySelectorAll('td');
+        const tds = this.nanny.getTdsInRow(tr);
         tds.forEach((val, index)=>{
             if (val === td){
                 colIndex = index;
@@ -46,7 +47,8 @@ export default{
         if (inRow == -1){
             return null;
         }else{
-            retTd = inRow.querySelectorAll(':scope > td')[tdCol];
+            // retTd = inRow.querySelectorAll(':scope > td')[tdCol];
+            retTd = this.nanny.getTdsInRow(inRow)[tdCol];
             return retTd;
         }
     },
@@ -67,19 +69,21 @@ export default{
         // find max column size
         this.forEachRow((row, rowIndex)=>{
             let thisRowSize = 0;
-            row.querySelectorAll(':scope > td').forEach((td, colIndex)=>{
+            this.nanny.getTdsInRow(row).forEach((td, colIndex)=>{
                 let span = me.getSpan(td);
                 thisRowSize += span[1];
             });
             allTdSize.push(thisRowSize);
         });
-        sizeCol = Math.max(...allTdSize);
+        if (allTdSize.length > 0) {
+            sizeCol = Math.max(...allTdSize);
+        }
         // this.forUnderTable( (td)=>{
         //     let span = me.getSpan(td);
         //     sizeCol += span[1];
         // }, '> tr:first-child > td');
         return [
-            this.dom.querySelectorAll(`:scope > tbody > tr`).length,
+            this.nanny.getRowSize(this.dom),
             sizeCol
         ];
     },
@@ -107,7 +111,7 @@ export default{
      */
     forEachCell(fn){
         const fnTR = (tr, rowIndex)=>{
-            let tds = tr.querySelectorAll(':scope > td'),
+            let tds = this.nanny.getTdsInRow(tr),
                 colIndex = 0;
             for(let td of tds){
                 fn(td, rowIndex, colIndex, tr);
@@ -123,23 +127,23 @@ export default{
      * @param {fn}  receive arguments(element, index, all elements)
      */
     forEachRow(fn){
-        this.forUnderTable(fn, '> tr');
+        this.nanny.eachRow(this.dom, fn);
     },
 
 
     /**
      * loop under the table
      */
-    forUnderTable(fn, selector = '> tr > td'){
-        let elements = this.dom.querySelectorAll(`:scope > tbody ` + selector);
-        let index = -1;
-        for(let el of elements){
-            index++;
-            if (true === fn(el, index, elements)){
-                return;
-            }
-        }
-    },
+    // forUnderTable(fn, selector = '> tr > td'){
+    //     let elements = this.dom.querySelectorAll(`:scope > tbody ` + selector);
+    //     let index = -1;
+    //     for(let el of elements){
+    //         index++;
+    //         if (true === fn(el, index, elements)){
+    //             return;
+    //         }
+    //     }
+    // },
 
     /**
      * loop with table matrix
