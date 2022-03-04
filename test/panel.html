@@ -11,10 +11,10 @@
 </head>
 <body>
     <div style="text-align: center;">
-    <input type="button" value="append column" onclick="tb.addCellToAllRow()">
-    <input type="button" value="append row" onclick="tb.addNewRow()">
-    <input type="button" value="insert left" onclick="tb.insertCell(lastClickTd)">
-    <input type="button" value="insert top" onclick="tb.insertRow(lastClickTd)">
+    <input type="button" value="append column" onclick="tb.addCellToAllRow(tdAppendInjecter)">
+    <input type="button" value="append row" onclick="tb.addNewRow(tdAppendInjecter)">
+    <input type="button" value="insert left" onclick="tb.insertCell(lastClickTd, tdInsertInjecter)">
+    <input type="button" value="insert top" onclick="tb.insertRow(lastClickTd, tdInsertInjecter)">
     <br>
     <input type="button" value="split" onclick="split()">
     <input type="button" value="merge" onclick="tb.merge(...mouseMoveTd);clearStyle('over');">
@@ -28,10 +28,9 @@
         let tb = new TableBuster(document.querySelector('table'));
         // let tds;
 
-        function split(){
+        function split(fn){
             tb.split(lastClickTd, 
-                function(td, offsetRow, offsetCell){
-                    console.log(offsetRow, offsetCell);
+                function(td, offsetRow, offsetCell, table, tr){
                     td.innerText = `split in (${offsetRow}, ${offsetCell})`;
                     return td;
                 }
@@ -106,11 +105,20 @@
             }, false);
         }
 
+        function tdAppendInjecter(newTd, rowIndex, cellIndex, table, tr) {
+            newTd.innerText = `APPEND(${rowIndex + 1}, ${cellIndex + 1})`;
+            return newTd
+        }
+
+        function tdInsertInjecter(newTd, rowIndex, cellIndex, table, tr) {
+            newTd.innerText = `INSERT(${rowIndex + 1}, ${cellIndex + 1})`;
+            return newTd
+        }
+
         fillSquare(10);
         tb.refresh();
         eventForTest();
         lastClickTd = document.querySelector('td');
-
         
         const tds = document.querySelectorAll('td');
 

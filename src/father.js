@@ -12,10 +12,11 @@ export default {
             // row 1
             let spanIndexCol = spanCol - 1;
             while (spanIndexCol > 0) {
+                const row = this.nanny.getRowByTd(this.dom, td);
                 this.nanny.insertAfterTd(
-                    this.nanny.getRowByTd(this.dom, td), 
+                    row,
                     td,
-                    decorater(this.nanny.newTd(), 0,  spanIndexCol - 1)
+                    decorater(this.nanny.newTd(), 0, spanIndexCol - 1, this.dom, row)
                 );
                 spanIndexCol--;
             }
@@ -37,7 +38,13 @@ export default {
                     while (spanIndexCol >= 0) {
                         this.nanny.appendTd(
                             tr,
-                            decorater(this.nanny.newTd(), spanRow - 1 - spanIndexRow, spanCol - 1 - spanIndexCol)
+                            decorater(
+                                this.nanny.newTd(),
+                                spanRow - 1 - spanIndexRow,
+                                spanCol - 1 - spanIndexCol,
+                                this.dom,
+                                tr
+                            )
                         );
                         spanIndexCol--;
                     }
@@ -50,7 +57,13 @@ export default {
                                 this.nanny.insertBeforeTd(
                                     tr,
                                     tdFound,
-                                    decorater(this.nanny.newTd(), spanRow - 1 - spanIndexRow, spanCol - 1 - spanIndexCol)
+                                    decorater(
+                                        this.nanny.newTd(),
+                                        spanRow - 1 - spanIndexRow,
+                                        spanCol - 1 - spanIndexCol,
+                                        this.dom,
+                                        tr
+                                    )
                                 );
                                 spanIndexCol--;
                             }
@@ -60,7 +73,13 @@ export default {
                                 this.nanny.insertAfterTd(
                                     tr,
                                     tdFound,
-                                    decorater(this.nanny.newTd(), spanRow - 1 - spanIndexRow, spanIndexCol - 1)
+                                    decorater(
+                                        this.nanny.newTd(),
+                                        spanRow - 1 - spanIndexRow,
+                                        spanIndexCol - 1,
+                                        this.dom,
+                                        tr
+                                    )
                                 );
                                 spanIndexCol--;
                             }
@@ -115,7 +134,6 @@ export default {
     
     deleteRow(td) {
         if (!td) return;
-        // const tr = td.parentNode;
         const [tdRowMatrix, tdColMatrix] = this.getTdMatrix(td);
 
         const tdRowSpan = this.nanny.getTdRowSpan(td);
@@ -128,9 +146,9 @@ export default {
     },
 
     deleteRowHandler(tdRowMatrix) {
-        const tr = this.nanny.findRowByIndex(this.dom, tdRowMatrix);
+        const tr = this.nanny.getRowByIndex(this.dom, tdRowMatrix);
         // const nextTr = tr.nextElementSibling;
-        const nextTr = this.nanny.findRowByIndex(this.dom, tdRowMatrix + 1);
+        const nextTr = this.nanny.getRowByIndex(this.dom, tdRowMatrix + 1);
         const tbSize = this.getSize();
         let colIndex = 0;
         const tdMarkShort = [];

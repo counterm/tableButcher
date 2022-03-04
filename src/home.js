@@ -4,7 +4,6 @@ import liLei from './liLei';
 import hanMeiMei from './hanMeiMei';
 import puppy from './puppy';
 import nannyDom from './nannyDom';
-import nannyObj from './nannyObj';
 
 // output layer
 let diapason = {
@@ -22,10 +21,12 @@ const TableBuster = function(table){
     this.init(table);
     this.buildMatrix();
 };
-const TableObjectBuster = function (object) {
+const TableObjectBuster = function (nannyObj) {
     this.nanny = nannyObj;
-    this.initObject(object);
-    this.buildMatrix();
+    this.init = function(object) {
+        this.initObj(object);
+        this.buildMatrix();
+    };
 };
 // Object.assign(diapason, father, mother, liLei, hanMeiMei, puppy);
 TableBuster.prototype = diapason;
@@ -34,4 +35,5 @@ TableObjectBuster.prototype = diapason;
 export { TableObjectBuster, TableBuster };
 
 window.TableBuster = TableBuster;
+window.TableObjectBuster = TableObjectBuster;
 // export default TableBuster;

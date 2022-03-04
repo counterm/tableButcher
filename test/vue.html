@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+	<style>
+		*{text-align: center;}
+		td{min-width: 5em;}
+	</style>
+</head>
+<body>
+	<div id="app">
+	    <input type="button" value="append column" @click="tb.addCellToAllRow(tdAppendInjecter)">
+	    <input type="button" value="append row" @click="tb.addNewRow(tdAppendInjecter)">
+	    <input type="button" value="insert left" @click="insertLeft">
+	    <input type="button" value="insert top" @click="insertTop">
+	    <br>
+	    <input type="button" value="split" @click="split">
+	    <input type="button" value="merge" @click="tb.merge(...mouseMoveTd);clearStyle('over');">
+	    <input type="button" value="delete column" @click="tb.deleteColumn(lastClickTd)" />
+	    <input type="button" value="delete row" @click="tb.deleteRow(lastClickTd)" />
+		<hr>
+		<table border="1" align="center" 
+			@click="click">
+			<tr v-for="tr in trs">
+				<td v-for="(td, index) in tr"
+				:style="getStyle(td)"
+				@click.prevent.stop="click($event, td, index, tr)"
+				@mousedown.prevent.stop="mousedown($event, td, index, tr)" 
+				@mouseover.prevent.stop="mouseover($event, td, index, tr)"
+				@mouseup.prevent.stop="mouseup($event, td, index, tr)" 
+				:rowspan="td.rowspan" :colspan="td.colspan">{{td.text}}&nbsp;</td>
+			</tr>
+		</table>
+		<hr>
+		<input type="button" @click="showData" />
+	</div>
+
+	<script src="./nanny.js"></script>
+	<script src="../src/home.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.4/vue.min.js"></script>
+	<link rel="shortcut icon" type="image/x-icon" href="https://cdnjs.cloudflare.com/ajax/libs/ant-design-vue/1.7.8/antd.css" />
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/ant-design-vue/1.7.8/antd.min.js"></script>
+	<script>
+
+		let tb = new TableObjectBuster(getNanny())
+
+		Vue.config.devtools = true
+		new Vue({
+			el: '#app',
+			data() {
+				return {
+					flagMouseDown: false,
+					mouseMoveTd: [null, null],
+					lastClickTd: null,
+
+					tb,
+					trs: [
+						[
+							{
+								colspan: 1,
+								rowspan: 1,
+								text: 'A'
+							},
+							{
+								colspan: 1,
+								rowspan: 2,
+								text: 'B'
+							}
+						],[
+							{
+								colspan: 1,
+								rowspan: 1
+							}
+						]
+					]
+				}
+			},
+			mounted() {
+				this.tb.init(this.trs)
+			},
+			methods: {
+				showData() {
+					console.dir(this.tr)
+				},
+				insertLeft() {
+					if (!this.lastClickTd) {
+						alert('请选择单元格')
+						return;
+					}
+					this.tb.insertCell(this.lastClickTd, this.tdInsertInjecter)
+				},
+				insertTop() {
+					if (!this.lastClickTd) {
+						alert('请选择单元格')
+						return;
+					}
+					this.tb.insertRow(this.lastClickTd, this.tdInsertInjecter)
+				},
+				split() {
+		            this.tb.split(this.lastClickTd, 
+		                function(td, offsetRow, offsetCell, obj, tr){
+		                    td.innerText = `split in (${offsetRow}, ${offsetCell})`
+		                    return td
+		                }
+		            );
+		            this.clearLastChild()
+		            this.clearStyle('over')
+				},
+
+				// EVENT
+				mousedown(event, td) {
+					// const el = event.target
+					// if (el.tagName == 'TD') {
+					this.flagMouseDown = true
+					this.clearStyle()
+					this.mouseMoveTd[0] = td
+					// }
+				},
+				mouseover(event, td) {
+					if (this.flagMouseDown) {
+						this.mouseMoveTd[1] = td
+						let tdRange = this.tb.findAreaTd(...this.mouseMoveTd)
+						this.clearLastChild()
+						tdRange.forEach(td => {
+							td.over = true
+						})
+						this.updateTrs()
+					}
+				},
+				mouseup(event, td) {
+					const el = event.target
+					if (el.tagName == 'TD') {
+						this.flagMouseDown = false
+					}
+				},
+				click(event, td, index, tr) {
+					if (!td) {return}
+					this.clearLastChild()
+					td.click = 1
+					this.lastClickTd = td
+					this.updateTrs()
+				},
+
+				// 因为初始数据不存在属性 click和over，所以需要强制更新
+				updateTrs() {
+					this.$forceUpdate()
+				},
+				getStyle(td, index, tr) {
+					let ret = ''
+					if (td.click) {
+						ret += 'background-color: yellow;'
+					}
+					if (td.over) {
+						ret += 'background-color: green;'
+					}
+					return ret
+				},
+				clearStyle() {
+					
+				},
+				clearLastChild() {
+					// clear over
+					this.trs.forEach(tr => {
+						tr.forEach(td => {
+							td.over = 0
+						})
+					})
+					// 
+					if (this.lastClickTd) {
+						this.lastClickTd.click = 0
+					}
+					this.lastClickTd = null
+				},
+
+				tdAppendInjecter(newTd, rowIndex, cellIndex, obj, row) {
+					newTd.innerText = `APPEND(${rowIndex + 1}, ${cellIndex + 1})`
+					return newTd
+				},
+				tdInsertInjecter(newTd, rowIndex, cellIndex, obj, row) {
+					newTd.innerText = `INSERT(${rowIndex + 1}, ${cellIndex + 1})`
+					return newTd
+				}
+			}
+		})
+	</script>
+</body>
+</html>

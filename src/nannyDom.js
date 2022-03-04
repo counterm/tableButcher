@@ -4,8 +4,6 @@ export default {
 	newTr: () => document.createElement('tr'),
 	delTr: (table, row) => table.childNodes[0].removeChild(row),
 
-	findRowByIndex: (table, rowIndex) => table.childNodes[0].childNodes[rowIndex],
-
 	getTdRowSpan: (obj) => obj.rowSpan,
 	getTdColSpan: (obj) => obj.colSpan,
 	getRowByIndex: (table, index) => table.childNodes[0].childNodes[index],
@@ -35,7 +33,8 @@ export default {
 		}
 	},
 
-	insertRow: (table, index) => table.insertRow(index),
+	insertEmptyRow: (table, index) => table.insertRow(index),
+	insertRowBefore: (table, row, newRow) => row.before(newRow),
 	insertBeforeTd: (row, td, newEl) => td.before(newEl),
 	insertAfterTd: (row, td, newEl) => td.after(newEl),
 	appendTd: (tr, el) => tr.appendChild(el),
@@ -51,14 +50,14 @@ export default {
 	 * @param {Boolean} offset 		指明是否把前两值作为相对变动的值
 	 */
 	setTdSpan(td, rowSpan, colSpan, offset = false){
-		if (rowSpan) {
+		if (rowSpan !== null) {
 			if (offset) {
 				td.rowSpan += rowSpan;
 			} else {
 				td.rowSpan = rowSpan;
 			}
 		}
-		if (colSpan) {
+		if (colSpan !== null) {
 			if (offset) {
 				td.colSpan += colSpan;
 			} else {

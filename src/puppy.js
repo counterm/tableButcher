@@ -5,6 +5,9 @@ export default {
     init(table){
         this.dom = table;
     },
+    initObj(obj) {
+        this.dom = obj;
+    },
 
     getSpan(td){
         return [this.nanny.getTdRowSpan(td), this.nanny.getTdColSpan(td)];
@@ -13,7 +16,7 @@ export default {
 
     getTdIndex(td){
         if (!td) return;
-        const tr = td.parentNode;
+        const tr = this.nanny.getRowByTd(this.dom, td);
         let rowIndex = -1,
             colIndex = -1;
         this.forEachRow((row, index)=>{

@@ -18,8 +18,9 @@ export default {
         
         // remove node
         arrTdInArea.forEach((td, index)=>{
-            this.nanny.moveTdChilds(td, firstTd)
-            td.parentNode.removeChild(td);
+            this.nanny.moveTdChilds(td, firstTd);
+            const tr = this.nanny.getRowByTd(this.dom, td);
+            this.nanny.delTd(tr, td);
         });
 
         // merge node
