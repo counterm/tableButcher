@@ -6,7 +6,7 @@
 
 
 
-基础表格演示 [DEMO](https://counterm.github.io/tableButcher/demo/index.html)
+基础表格演示 [DEMO](https://counterm.github.io/tableButcher/demo/panel.html)
 VUE演示 [DEMO](https://counterm.github.io/tableButcher/demo/vue.html)
 
 
