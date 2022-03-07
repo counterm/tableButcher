@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Control Cell</title>
+    <style>
+        td.over{
+            background-color:#8fd88f;
+        }
+    </style>
+</head>
+<body>
+    <div style="text-align: center;">
+    <input type="button" value="append column" onclick="tb.addCellToAllRow(tdAppendInjecter)">
+    <input type="button" value="append row" onclick="tb.addNewRow(tdAppendInjecter)">
+    <input type="button" value="insert left" onclick="tb.insertCell(lastClickTd, tdInsertInjecter)">
+    <input type="button" value="insert top" onclick="tb.insertRow(lastClickTd, tdInsertInjecter)">
+    <br>
+    <input type="button" value="split" onclick="split()">
+    <input type="button" value="merge" onclick="tb.merge(...mouseMoveTd);clearStyle('over');">
+    <input type="button" value="delete column" onclick="tb.deleteColumn(lastClickTd)" />
+    <input type="button" value="delete row" onclick="tb.deleteRow(lastClickTd)" />
+    </div>
+
+    <table border="1" width="100%" cellpadding="10"></table>
+    <script src="./table_buster.min.js"></script>
+    <script>
+        let tb = new TableBuster(document.querySelector('table'));
+        // let tds;
+
+        function split(fn){
+            tb.split(lastClickTd, 
+                function(td, offsetRow, offsetCell, table, tr){
+                    td.innerText = `split in (${offsetRow}, ${offsetCell})`;
+                    return td;
+                }
+            );
+            clearLastChild();
+            clearStyle('over');
+        }
+
+        function fillSquare(rowCapacity){
+            Array.apply(null, {length:rowCapacity}).forEach(()=>{
+                tb.addNewRow().addCellToAllRow();
+            });
+            let characterStart = 65;
+            document.querySelectorAll('td').forEach((td, index)=>{
+                td.innerText = String.fromCharCode(characterStart+(index / rowCapacity)) + index % rowCapacity;
+            });
+        }
+
+        function clearStyle(className){
+            document.querySelectorAll('td').forEach((td)=>{
+                td.classList.remove(className);
+            });
+        }
+
+        function clearLastChild(){
+            if (lastClickTd)
+                lastClickTd.style.backgroundColor = "";
+                lastClickTd = null;
+        }
+
+        let lastClickTd = null,
+            flagMouseDown = false,
+            mouseMoveTd = [null, null];
+        function eventForTest(){
+            tb.dom.addEventListener('click', (event)=>{
+                if (event.target.nodeName === 'TD'){
+                    mouseMoveTd = [null, null];
+                    event.target.style.backgroundColor = "yellow";
+                    // if (lastClickTd)
+                    //     lastClickTd.style.backgroundColor = "";
+                    clearLastChild();
+                    lastClickTd = event.target;
+                }
+            }, false);
+
+            tb.dom.addEventListener('mousedown', (event)=>{
+                event.preventDefault();
+                event.stopPropagation();
+                if (event.target.nodeName === 'TD'){
+                    flagMouseDown = true;
+                    clearStyle('over');
+                    mouseMoveTd[0] = event.target;
+                    event.target.classList.add('over');
+                }
+            }, false);
+            tb.dom.addEventListener('mouseover', (event)=>{
+                if (event.target.nodeName === 'TD'){
+                    if (flagMouseDown === true){
+                        mouseMoveTd[1] = event.target;
+                        let tdRange = tb.findAreaTd(...mouseMoveTd);
+                        clearStyle('over');
+                        tdRange.forEach((td)=>{
+                            td.classList.add('over');
+                        });
+                        // clear last child
+                        clearLastChild();
+                    }
+                }
+            }, false);
+            tb.dom.addEventListener('mouseup', (event)=>{
+                flagMouseDown = false;
+            }, false);
+        }
+
+        function tdAppendInjecter(newTd, rowIndex, cellIndex, table, tr) {
+            newTd.innerText = `APPEND(${rowIndex + 1}, ${cellIndex + 1})`;
+            return newTd
+        }
+
+        function tdInsertInjecter(newTd, rowIndex, cellIndex, table, tr) {
+            newTd.innerText = `INSERT(${rowIndex + 1}, ${cellIndex + 1})`;
+            return newTd
+        }
+
+        fillSquare(10);
+        tb.refresh();
+        eventForTest();
+        lastClickTd = document.querySelector('td');
+        
+        const tds = document.querySelectorAll('td');
+
+        //
+        // tb.merge(tds[12], tds[24]);
+    </script>
+</body>
+</html>

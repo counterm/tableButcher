@@ -6,8 +6,8 @@
   "scripts": {
     "test": "test",
     "dev": "parcel serve ./test/panel.html",
-    "build": "node ./test/cp.js && parcel build ./src/home.js -d demo -o table_buster.min.js",
-    "vueDev": "parcel serve ./test/vue.html --port 1235"
+    "vueDev": "parcel serve ./test/vue.html --port 1235",
+    "build": "node ./test/cp.js && parcel build ./src/home.js -d demo -o table_buster.min.js"
   },
   "keywords": [
     "cell",
