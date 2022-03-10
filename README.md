@@ -29,6 +29,7 @@ var tb = new TableBuster(document.querySelector('table'));
 参数：操作接口对象
 ```
 var tb = new TableObjectBuster(nanny);
+tb.init(columnsData);
 ```
 
 
