@@ -3,23 +3,55 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Document</title>
+	<title>VUE TEST</title>
 	<style>
-		*{text-align: center;}
+		html body {padding: 20px;}
 		td{min-width: 5em;}
+		.btn-wrap1{text-align:right;}
+		.btn-wrap2{text-align: left;}
+		.spliter{text-align: center;}
+		.spliter .ant-divider, .ant-divider-vertical {height: 96px;}
 	</style>
+
+	<script src="./nanny.js"></script>
+	<script src="./table_buster.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.4/vue.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/ant-design-vue/1.7.8/antd.css" />
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/ant-design-vue/1.7.8/antd.min.js"></script>
 </head>
 <body>
 	<div id="app">
-	    <input type="button" value="append column" @click="tb.addCellToAllRow(tdAppendInjecter)">
-	    <input type="button" value="append row" @click="tb.addNewRow(tdAppendInjecter)">
-	    <input type="button" value="insert left" @click="insertLeft">
-	    <input type="button" value="insert top" @click="insertTop">
-	    <br>
-	    <input type="button" value="split" @click="split">
-	    <input type="button" value="merge" @click="tb.merge(...mouseMoveTd);clearStyle('over');">
-	    <input type="button" value="delete column" @click="tb.deleteColumn(lastClickTd)" />
-	    <input type="button" value="delete row" @click="tb.deleteRow(lastClickTd)" />
+			<a-row :gutter="18">
+				<a-col :span="11" class="btn-wrap1">
+					first version: 
+            <br>
+					<input type="button" value="append column" @click="tb.addCellToAllRow(tdAppendInjecter)">
+					<input type="button" value="append row" @click="tb.addNewRow(tdAppendInjecter)">
+					<input type="button" value="insert left" @click="insertLeft">
+					<input type="button" value="insert top" @click="insertTop">
+					<br>
+					<input type="button" value="split" @click="split">
+					<input type="button" value="merge" @click="tb.merge(...mouseMoveTd);clearStyle('over');">
+					<input type="button" value="delete column" @click="tb.deleteColumn(lastClickTd)" />
+					<input type="button" value="delete row" @click="tb.deleteRow(lastClickTd)" />
+				</a-col>
+				<a-col :span="1" class="spliter">
+					<a-divider type="vertical" />
+				</a-col>
+				<a-col :span="12" class="btn-wrap2">
+					<div>round 2: </div>
+					<input type="button" value="insert right" @click="insertRight" />
+					<input type="button" value="insert bottom" @click="insertBottom" />
+					<br>
+					merge to td's ___: 
+					<br>
+					<input type="button" value="up" @click="mergeTo(0)" />
+					<input type="button" value="right" @click="mergeTo(1)" />
+					<input type="button" value="down" @click="mergeTo(2)" />
+					<input type="button" value="left" @click="mergeTo(3)" />
+				</a-col>
+			</a-row>
+
 		<hr>
 		<table border="1" align="center" 
 			@click="click">
@@ -37,11 +69,7 @@
 		<input type="button" @click="showData" />
 	</div>
 
-	<script src="./nanny.js"></script>
-	<script src="./table_buster.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.4/vue.min.js"></script>
-	<link rel="shortcut icon" type="image/x-icon" href="https://cdnjs.cloudflare.com/ajax/libs/ant-design-vue/1.7.8/antd.css" />
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/ant-design-vue/1.7.8/antd.min.js"></script>
+
 	<script>
 
 		let tb = new TableObjectBuster(getNanny())
@@ -181,6 +209,54 @@
 				tdInsertInjecter(newTd, rowIndex, cellIndex, obj, row) {
 					newTd.innerText = `INSERT(${rowIndex + 1}, ${cellIndex + 1})`
 					return newTd
+				},
+
+
+				// ROUND 2
+				insertRight() {
+					if (this.lastClickTd) {
+						const tb = this.tb
+						// 检查是否最后一个
+						const nextTd = tb.findTheTdNext(this.lastClickTd)
+						if (!nextTd) {
+							tb.addCellToAllRow()
+						} else {
+							tb.insertCell(nextTd)
+						}
+					}
+				},
+				insertBottom() {
+					if (this.lastClickTd) {
+						const tb = this.tb
+						// 检查是否最后一个
+						const td = tb.findTheTdUnder(this.lastClickTd)
+						if (!td) {
+								tb.addNewRow()
+						} else {
+								tb.insertRow(td)
+						}
+					}
+				},
+				mergeTo(dir) {
+					const tb = this.tb
+					const lastClickTd = this.lastClickTd
+					let td = null
+					switch(dir) {
+						case 0:
+							td = tb.findTheTdAbove(lastClickTd)
+							break
+						case 1:
+							td = tb.findTheTdNext(lastClickTd)
+							break
+						case 2:
+							td = tb.findTheTdUnder(lastClickTd)
+								break
+						default:
+							td = tb.findTheTdPrev(lastClickTd)
+					}
+					if (td) {
+						tb.merge(lastClickTd, td)
+					}
 				}
 			}
 		})

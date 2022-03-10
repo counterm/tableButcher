@@ -7,20 +7,45 @@
         td.over{
             background-color:#8fd88f;
         }
+        .withHr {
+            display: flex;
+        }
+        .withHr hr {
+            align-items: center;
+        }
     </style>
 </head>
 <body>
-    <div style="text-align: center;">
-    <input type="button" value="append column" onclick="tb.addCellToAllRow(tdAppendInjecter)">
-    <input type="button" value="append row" onclick="tb.addNewRow(tdAppendInjecter)">
-    <input type="button" value="insert left" onclick="tb.insertCell(lastClickTd, tdInsertInjecter)">
-    <input type="button" value="insert top" onclick="tb.insertRow(lastClickTd, tdInsertInjecter)">
-    <br>
-    <input type="button" value="split" onclick="split()">
-    <input type="button" value="merge" onclick="tb.merge(...mouseMoveTd);clearStyle('over');">
-    <input type="button" value="delete column" onclick="tb.deleteColumn(lastClickTd)" />
-    <input type="button" value="delete row" onclick="tb.deleteRow(lastClickTd)" />
+    <div style="display: flex; line-height: 1.6em;">
+        <div style="text-align: center;flex: 40; text-align: right;"> 
+            first version: 
+            <br>
+            <input type="button" value="append column" onclick="tb.addCellToAllRow(tdAppendInjecter)">
+            <input type="button" value="append row" onclick="tb.addNewRow(tdAppendInjecter)">
+            <input type="button" value="insert left" onclick="tb.insertCell(lastClickTd, tdInsertInjecter)">
+            <input type="button" value="insert top" onclick="tb.insertRow(lastClickTd, tdInsertInjecter)">
+            <br>
+            <input type="button" value="split" onclick="split()">
+            <input type="button" value="merge" onclick="tb.merge(...mouseMoveTd);clearStyle('over');">
+            <input type="button" value="delete column" onclick="tb.deleteColumn(lastClickTd)" />
+            <input type="button" value="delete row" onclick="tb.deleteRow(lastClickTd)" />
+        </div>
+        <div class="withHr" style="flex-basis:40px; flex-shrink: 1;"><hr></div>
+        <div style="flex: 40;">
+            <div>round 2: </div>
+            <input type="button" value="insert right" onclick="insertRight()" />
+            <input type="button" value="insert bottom" onclick="insertBottom()" />
+            <br>
+            merge to td's ___: 
+            <br>
+            <input type="button" value="up" onclick="mergeTo(0)" />
+            <input type="button" value="right" onclick="mergeTo(1)" />
+            <input type="button" value="down" onclick="mergeTo(2)" />
+            <input type="button" value="left" onclick="mergeTo(3)" />
+        </div>
     </div>
+
+    <hr>
 
     <table border="1" width="100%" cellpadding="10"></table>
     <script src="./table_buster.min.js"></script>
@@ -123,7 +148,51 @@
         const tds = document.querySelectorAll('td');
 
         //
-        // tb.merge(tds[12], tds[24]);
+        tb.merge(tds[12], tds[24]);
+
+        // ROUND 2
+        function insertRight(){
+            if (lastClickTd) {
+                // 检查是否最后一个
+                const nextTd = tb.findTheTdNext(lastClickTd);
+                if (!nextTd) {
+                    tb.addCellToAllRow();
+                } else {
+                    tb.insertCell(nextTd);
+                }
+            }
+        }
+        function insertBottom() {
+            if (lastClickTd) {
+                // 检查是否最后一个
+                const td = tb.findTheTdUnder(lastClickTd);
+                if (!td) {
+                    tb.addNewRow();
+                } else {
+                    tb.insertRow(td);
+                }
+            }
+        }
+        // merge to
+        function mergeTo(dir) {
+            let td = null;
+            switch(dir) {
+                case 0:
+                    td = tb.findTheTdAbove(lastClickTd);
+                    break;
+                case 1:
+                    td = tb.findTheTdNext(lastClickTd);
+                    break;
+                case 2:
+                    td = tb.findTheTdUnder(lastClickTd);
+                    break;
+                default:
+                    td = tb.findTheTdPrev(lastClickTd);
+            }
+            if (td) {
+                tb.merge(lastClickTd, td);
+            }
+        }
     </script>
 </body>
 </html>
