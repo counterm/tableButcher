@@ -21,7 +21,7 @@ function getNanny() {
 		getRowByTd(object, td){
 			let ret = null
 			this.eachRow(object, (row) => {
-				const index = row.indexOf(td)
+				const index = this.getTdsInRow(row).indexOf(td)
 				if (index > -1) {
 					ret = row
 				}
@@ -65,11 +65,11 @@ function getNanny() {
 			const index = object.indexOf(row)
 			object.splice(index, 0, newRow)
 		},
-		insertBeforeTd: (row, td, newEl) => {
-			row.splice(row.indexOf(td), 0, newEl)
+		insertBeforeTd(row, td, newEl) {
+			row.splice(this.getTdsInRow(row).indexOf(td), 0, newEl)
 		},
-		insertAfterTd: (row, td, newEl) => {
-			row.splice(row.indexOf(td) + 1, 0, newEl)
+		insertAfterTd(row, td, newEl) {
+			row.splice(this.getTdsInRow(row).indexOf(td) + 1, 0, newEl)
 		},
 		appendTd: (row, newEl) => row.push(newEl),
 		// 移动td内容到新td

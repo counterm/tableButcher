@@ -121,7 +121,16 @@ export default {
 
 
     // change axis
-    matrixMat2Td(matRow, matCol){
+    matrixMat2Td(matRow, matCol) {
+        if (this.matrix.length > 0 &&
+            (
+                matRow < 0 || matCol < 0 ||
+                matRow >= this.matrix.length || matCol >= this.matrix[0].length
+            )
+        ) {
+            console.error('Out of range in Method MatrixMat2Td')
+            return null
+        }
         if (this.cellType(matRow, matCol) === this.CELL_BIG){
             [matRow, matCol] = this.findFirstNumberPosition(matRow, matCol);
         }
@@ -277,6 +286,7 @@ export default {
      * return the start and end.
      * @param {Array(x,y)} matRow 
      * @param {Array(x,y)} matCol 
+     * @return [[indexX, indexY], [indexX, indexY]]
      */
     getBigCellSize(matRow, matCol){
         let number = this.matrix[matRow][matCol],
@@ -328,6 +338,7 @@ export default {
     /**
      * get all matrix unit of which was by TD holding
      * @param  {...any} arrTd 
+     * @return [[startMatrixX, startMatrixY], [endMatrixX, endMatrixY]]
      */
     getMatRectangeAreaByTd(...arrTd){
         let me = this,

@@ -31,6 +31,40 @@ export default {
         this.refresh();
     },
 
+    /**
+     * 
+     * @param {*} td           relative td
+     * @param {*} direction    0 up, 1 right, 2 down, 3 left
+     * 
+     */
+    mergeTo(td, direction) {
+        const tdMatrix = this.getTdMatrix(td);
+        const nextMatrix = [...tdMatrix];
+        switch (direction) {
+            case 0:
+                nextMatrix[0]--;
+                break;
+            case 1:
+                const colSpan = this.nanny.getTdColSpan(td);
+                nextMatrix[1] += colSpan;
+                break;
+            case 2:
+                const rowSpan = this.nanny.getTdRowSpan(td);
+                nextMatrix[0] += rowSpan;
+                break;
+            default:
+                nextMatrix[1]--;
+                break;
+        }
+        const nextTd = this.getTdByMatrix(...nextMatrix);
+        if (nextTd) {
+            this.merge(td, nextTd);
+            return this.matrixMat2Td(...tdMatrix);
+        } else {
+            return null;
+        }
+    },
+
 
     /**
      * 

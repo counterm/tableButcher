@@ -14,8 +14,13 @@ export default {
     },
 
 
+    /**
+     * 
+     * @param {*} td 
+     * @returns [rowIndex, colIndex]
+     */
     getTdIndex(td){
-        if (!td) return;
+        if (!td) return null;
         const tr = this.nanny.getRowByTd(this.dom, td);
         let rowIndex = -1,
             colIndex = -1;
@@ -56,16 +61,24 @@ export default {
         }
     },
 
+    // return [matRowIndex, matColIndex]
     getTdMatrix(td) {
+        if (!td) return null;
         return this.matrixTd2Mat(...this.getTdIndex(td));
     },
 
-    getTdByMatrix(matRow, matCol){
-        return this.getTdByIndex(...this.matrixMat2Td(matRow, matCol));
+    getTdByMatrix(matRow, matCol) {
+        const tdIndex = this.matrixMat2Td(matRow, matCol);
+        if (tdIndex) {
+            return this.getTdByIndex(...tdIndex);
+        } else {
+            return null;
+        }
     },
 
     /**
      * calculate table rectangle size
+     * @return [rowSize, colSize]
      */
     getSize(){
         let sizeCol = 0, me = this, allTdSize=[];
@@ -180,5 +193,110 @@ export default {
             }
         });
         return ret;
+    },
+
+    isTheFirstTd(td) {
+        const tdMatrix = this.getTdMatrix(td);
+        if (tdMatrix[1] == 0) {
+            return true;
+        } else {
+            return false;
+        }
+    },
+    isTheLastTd(td) {
+        const tdMatrix = this.getTdMatrix(td);
+        const colSpan = this.nanny.getTdColSpan(td);
+        const size = this.getSize();
+        if (tdMatrix[1] + colSpan == size[1]) {
+            return true;
+        } else {
+            return false;
+        }
+    },
+    /**
+     * Check if it is the first TR
+     * Arguments tr and td need one, tr first.
+     * @param {*} tr
+     * @param {*} td 
+     * @returns 
+     */
+    isTheFirstTr(tr, td) {
+        let ret = false;
+        if (tr == null && td == null) { return null; }
+        if (tr) {
+            this.nanny.eachRow(this.dom, (row, rowIndex) => {
+                if (row == tr && rowIndex == 0) {
+                    ret = true;
+                }
+            });
+        } else {
+            const tdMatrix = this.getTdMatrix(td);
+            if (tdMatrix[0] == 0) {
+                ret = true;
+            }
+        }
+        return ret;
+    },
+    /**
+     * Check if it is the last TR
+     * Arguments tr and td need one, tr first.
+     * @param {*} tr
+     * @param {*} td 
+     * @returns 
+     */
+    isTheLastTr(tr, td) {
+        let ret = false;
+        if (tr == null && td == null) { return null; }
+        const size = this.getSize();
+        if (tr) {
+            this.nanny.eachRow(this.dom, (row, rowIndex) => {
+                if (row == tr && rowIndex + 1 == size[1]) {
+                    ret = true;
+                }
+            })
+        } else {
+            const area = this.getMatRectangeAreaByTd(td);
+            if (area[1][0] + 1 == size[0]) {
+                ret = true;
+            }
+        }
+        return ret;
+    },
+    findTheTdNext(td) {
+        if (this.isTheLastTd(td)) {
+            return null;
+        } else {
+            const tdMatrix = this.getTdMatrix(td);
+            const colSpan = this.nanny.getTdColSpan(td);
+            const ret = this.getTdByMatrix(tdMatrix[0], tdMatrix[1] + colSpan);
+            return ret;
+        }
+    },
+    findTheTdPrev(td) {
+        if (this.isTheFirstTd(td)) {
+            return null;
+        } else {
+            const tdMatrix = this.getTdMatrix(td);
+            const ret = this.getTdByMatrix(tdMatrix[0], tdMatrix[1] - 1);
+            return ret;
+        }
+    },
+    findTheTdAbove(td) {
+        if (this.isTheFirstTr(null, td)) {
+            return null;
+        } else {
+            const tdMatrix = this.getTdMatrix(td);
+            const ret = this.getTdByMatrix(tdMatrix[0] - 1, tdMatrix[1]);
+            return ret;
+        }
+    },
+    findTheTdUnder(td) {
+        if (this.isTheLastTr(null, td)) {
+            return null;
+        } else {
+            const area = this.getMatRectangeAreaByTd(td);
+            const ret = this.getTdByMatrix(area[1][0] + 1, area[0][1]);
+            return ret;
+        }
     }
 };

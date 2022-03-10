@@ -41,11 +41,19 @@ var tb = new TableObjectBuster(nanny);
 |addNewRow|向表格底部插入行。可传入方法，同上。|tb.addNewRow((td, rowIndex, cellIndex, table, tr) => {})|
 |insertCell|在所给出的单元格前插入列，可传入方法，同上。如果表格存在有单元格横跨插入的位置，会拉伸该单元格。|tb.insertCell(td, fn)|
 |insertRow|在所给出的单元格上方插入行，可传入方法，同上。如果表格存在有单元格横跨插入的位置，会拉伸该单元格。|tb.insertRow(td, fn)|
-|split|分割已合并的单元格。可传入方法对分割出的新单元格进行调整。|tb.split(fn)|
+|split|分割已合并的单元格。可传入方法对分割出的新单元格进行调整。|tb.split(td, fn)|
 |merge|合并给出的单元格，可对多个已合并的单元格进行再合并。|tb.merge(td1, td2, td3)|
 |deleteColumn|删除某个单元格所在的列。如果该单元格是合并过的，则会对其所影响的列都进行删除。如果所在的列存在合并的单元格，会对其进行缩减。|tb.deleteColumn(td)|
 |deleteRow|删除某个单元格所在的行，如果该单元格是合并过的，则会对其所影响的行都进行删除。如果所在的行存在合并的单元格，会对其进行缩减。|tb.deleteRow(td)|
 |refresh|刷新表格实例，如果表格被库以外的程序修改，需要调用refresh方法更新内部引用。|tb.refresh()|
+| isTheFirstTd | 判断是否最左侧的单元格，返回布尔值 | tb.isTheFirstTd(td) |
+| isTheLastTd | 判断是否最右侧的单元格，返回布尔值。 | tb.isTheLastTd(td) |
+| isTheFirstTr | 判断是否最顶层的行，返回布尔值。参数可选，可给出行，或单元格。 | tb.isTheFirstTr(tr, null), tb.isTheFirstTr(null, td) |
+| isTheLastTr | 判断是否最低层的行，返回布尔值。参数可选，可给出行，或单元格，如果给出单元格则判断单元格低部，而非判断所在的行。  |  tb.isTheLastTr(tr, null), tb.isTheLastTr(null, td)  |
+| findTheTdNext | 查找右侧的单元格。只返回一个。 | tb.findTheTdNext(td) |
+| findTheTdPrev | 查找左侧的单元格。只返回一个。 | tb.findTheTdPrev(td) |
+| findTheTdAbove | 查找上方的单元格。只返回一个。 | tb.findTheTdAbove(td) |
+| findTheTdUnder | 查找下方的单元格。只返回一个。 | tb.findTheTdUnder(td) |
 
 
 # 操作接口
